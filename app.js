@@ -1,5 +1,5 @@
 var App = {};
-var userId = window.location.pathname.split('?')[0];
+var userId = window.location.pathname.split('?')[0].substring(1);
 
 var container = document.getElementById('container');
 var currentAlbumCover = document.getElementById('album-current');
