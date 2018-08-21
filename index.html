@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Aiden Wallis &mdash; Spotify Now Playing</title>
+    <link href="https://aidenwallis.co.uk/favicon.ico" rel="shortuct icon">
+    <script src="https://use.typekit.net/ddr3uqp.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <style>
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+        html, body {
+            font-family: 'proxima-nova', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .wrapper {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+        #container {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            background: #1b1d20;
+            margin: auto;
+            transition: opacity .4s ease, transform .4s ease, width .4s ease;
+            opacity: 0;
+            transform: translateY(300px);
+        }
+        #container.raise {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #container.active {
+            width: 350px;
+        }
+        img {
+            width: 70px;
+            height: 70px;
+            transition: opacity .4s ease;
+            opacity: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        img.active {
+            opacity: 1;
+        }
+        .cover {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            z-index: 9;
+        }
+        .main {
+            position: absolute;
+            padding-left: 80px;
+            padding-top: 10px;
+            top: 0;
+            height: 70px;
+            width: 350px;
+            overflow: hidden;
+        }
+        #artists {
+            color: #25CBA3;
+            font-weight: 600;
+            margin: 0;
+            font-size: 15px;
+            text-transform: uppercase;
+        }
+        #name {
+            color: #fff;
+            margin: 4px 0 0;
+            font-size: 24px;
+        }
+        h4, h2 {
+            opacity: 0;
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            transform: translateX(-50px);
+            transition: opacity .4s ease, transform .4s ease;
+        }
+        h4.active, h2.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        h4.drop, h2.drop {
+            transform: translateY(100px);
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div id="container">
+            <div class="cover">
+                <img id="album-current" alt="Current album cover">
+                <img id="album-new" alt="New album cover">
+            </div>
+            <div class="main">
+                <h4 id="artists"></h4>
+                <h2 id="name"></h2>
+            </div>
+        </div>
+    </div>
+    <script src="https://use.typekit.net/ddr3uqp.js" async="async"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.4/fetch.min.js" defer="defer"></script>
+    <script src="app.js" defer="defer"></script>
+</body>
+</html>
