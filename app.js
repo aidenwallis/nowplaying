@@ -1,5 +1,6 @@
 var App = {};
-var userId = window.location.pathname.split('?')[0].substring(1);
+// var userId = window.location.pathname.split('?')[0].substring(1);
+var userId = '5b2e3e66f37dc906fc29d608';
 
 var container = document.getElementById('container');
 var currentAlbumCover = document.getElementById('album-current');
@@ -12,6 +13,7 @@ App.currentCover = '';
 App.loadedCovers = {};
 App.open = false;
 App.firstAlbumLoad = true;
+App.scrollingSong = false;
 
 App.checkSong = function() {
     fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true')
@@ -98,6 +100,17 @@ App.updateSongName = function(artists, name) {
     }, 550);
     setTimeout(function() {
         songName.textContent = name;
+        if (songName.offsetWidth > 270) {
+            if (!App.scrollingSong) {
+                App.scrollingSong = true;
+                songName.classList.add('scrolling');
+            }
+        } else {
+            if (App.scrollingSong) {
+                App.scrollingSong = false;
+                songName.classList.remove('scrolling');
+            }
+        }
         songName.classList.add('active');
     }, 750);
 };

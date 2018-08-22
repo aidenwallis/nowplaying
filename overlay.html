@@ -68,11 +68,11 @@
         }
         .main {
             position: absolute;
-            padding-left: 80px;
+            padding-left: 70px;
             padding-top: 10px;
             top: 0;
             height: 70px;
-            width: 350px;
+            min-width: 350px;
             overflow: hidden;
         }
         #artists {
@@ -90,9 +90,10 @@
         h4, h2 {
             opacity: 0;
             display: block;
-            overflow: hidden;
+            padding-left: 10px;
+            /* overflow: hidden; */
             white-space: nowrap;
-            text-overflow: ellipsis;
+            /* text-overflow: ellipsis; */
             transform: translateX(-50px);
             transition: opacity .4s ease, transform .4s ease;
         }
@@ -102,6 +103,21 @@
         }
         h4.drop, h2.drop {
             transform: translateY(100px);
+        }
+        h2.scrolling {
+            /* -webkit-animation: slide 30s linear infinite; */
+            position: absolute;
+            animation: slide 30s linear infinite;
+        }
+        @keyframes slide {
+            from {
+                /* left: 100%; */
+                transform: translateX(270px);
+            }
+            to {
+                /* left: -100%; */
+                transform: translateX(-100%);
+            }
         }
     </style>
 </head>
