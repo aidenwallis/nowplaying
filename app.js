@@ -100,7 +100,8 @@ App.updateSongName = function(artists, name) {
     }, 550);
     setTimeout(function() {
         songName.textContent = name;
-        if (songName.offsetWidth > 270) {
+        void songName.offsetWidth;
+        if (songName.clientWidth > 270) {
             if (!App.scrollingSong) {
                 App.scrollingSong = true;
                 songName.classList.add('scrolling');
