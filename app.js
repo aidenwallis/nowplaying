@@ -16,7 +16,7 @@ App.firstAlbumLoad = true;
 App.scrollingSong = false;
 
 App.checkSong = function() {
-    fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true')
+    fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true&ts=' + Date.now())
     .then(function(response) {
         return response.json();
     })
@@ -87,7 +87,7 @@ App.openElement = function() {
     }, 550);
 }
 
-App.updateSongName = function(artists, name) {
+App.updateSongName = function(artists = [], name) {
     artistsElement.classList.remove('active');
     setTimeout(function() {
         songName.classList.remove('active');
