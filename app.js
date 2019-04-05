@@ -1,6 +1,6 @@
 var App = {};
-var userId = window.location.pathname.split('?')[0].substring(1);
-// var userId = '5b2e3e66f37dc906fc29d608';
+// var userId = window.location.pathname.split('?')[0].substring(1);
+var userId = '5b2e3e66f37dc906fc29d608';
 
 var container = document.getElementById('container');
 var currentAlbumCover = document.getElementById('album-current');
@@ -101,7 +101,7 @@ App.updateSongName = function(artists = [], name) {
     setTimeout(function() {
         songName.textContent = name;
         void songName.offsetWidth;
-        if (songName.clientWidth > 270) {
+        if (songName.offsetWidth > 270) {
             if (!App.scrollingSong) {
                 App.scrollingSong = true;
                 songName.classList.add('scrolling');

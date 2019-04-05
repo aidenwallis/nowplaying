@@ -89,13 +89,17 @@
         }
         h4, h2 {
             opacity: 0;
-            display: block;
             padding-left: 10px;
-            /* overflow: hidden; */
-            white-space: nowrap;
-            /* text-overflow: ellipsis; */
             transform: translateX(-50px);
             transition: opacity .4s ease, transform .4s ease;
+        }
+        h4 {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        h2 {
+            display: inline-block;
         }
         h4.active, h2.active {
             opacity: 1;
