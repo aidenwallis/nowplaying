@@ -16,6 +16,10 @@ function timeoutPromise(dur) {
     });
 }
 
+function makeSongName(item) {
+    return `${item.album && item.album.artists ? item.album.artists.map(a => a.name).join(', ') : 'Various Artists'} - ${item.name}`;
+}
+
 App.currentSong = '';
 App.currentCover = '';
 App.user = null;
@@ -89,6 +93,54 @@ App.checkSong = function() {
                 return App.refreshToken();
             }
             return response.json();
+        })
+        .then(function(json) {
+            if (!json.item && !json.hasOwnProperty('is_playing')) {
+                // Spotify API error.
+                return timeoutPromise(1000)
+                    .then(function() {
+                        App.checkSong();
+                    });
+            }
+            if (!json.is_playing) {
+                if (App.open) {
+                    App.close();
+                }
+            } else {
+                if (App.currentSong !== data.songName) {
+                    App.currentSong = data.songName;
+                    App.updateSongName(data.artists, data.title);
+                }
+                if (App.currentCover !== data.albumCover) {
+                    App.currentCover = data.albumCover;
+                    App.updateCover(data.albumCover);
+                }
+                const albumImages = item.album.images.reduce(function(acc, cur) {
+                    acc[cur.height] = cur.url;
+                    return acc;
+                }, {});
+                const data = {
+                    songName: makeSongName(json.item),
+                    artists: json.item.artists,
+                    title: json.item.name,
+                    albumCover: albumImages[Math.max(Object.keys(albumImages))],
+                };
+                if (App.open) {
+                    App.startUpdate(data);
+                } else {
+                    return timeoutPromise(1200)
+                        .then(function() {
+                            App.startUpdate(data);
+                            return timeoutPromise(1000);
+                        }).then(function() {
+                            App.checkSong();
+                        });
+                }
+            }
+            return timeoutPromise(1000);
+        })
+        .then(function() {
+            App.checkSong();
         })
         .catch(function(error) {
             return timeoutPromise(1000)
