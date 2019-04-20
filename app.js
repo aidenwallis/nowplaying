@@ -95,6 +95,7 @@ App.checkSong = function() {
             return response.json();
         })
         .then(function(json) {
+            console.log(item);
             if (!json.item && !json.hasOwnProperty('is_playing')) {
                 // Spotify API error.
                 return timeoutPromise(1000)
@@ -107,7 +108,7 @@ App.checkSong = function() {
                     App.close();
                 }
             } else {
-                const albumImages = item.album.images.reduce(function(acc, cur) {
+                const albumImages = json.item.album.images.reduce(function(acc, cur) {
                     acc[cur.height] = cur.url;
                     return acc;
                 }, {});
@@ -135,6 +136,7 @@ App.checkSong = function() {
             App.checkSong();
         })
         .catch(function(error) {
+            console.error(error);
             return timeoutPromise(1000)
                 .then(function() {
                     App.checkSong();
