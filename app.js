@@ -95,7 +95,7 @@ App.checkSong = function() {
             return response.json();
         })
         .then(function(json) {
-            console.log(item);
+            console.log(json);
             if (!json.item && !json.hasOwnProperty('is_playing')) {
                 // Spotify API error.
                 return timeoutPromise(1000)
