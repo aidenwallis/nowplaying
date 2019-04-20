@@ -112,46 +112,45 @@ App.checkSong = function() {
                         App.checkSong();
                     });
             }
-            return response.json();
-        })
-        .then(function(json) {
-            if (!json.item && !json.hasOwnProperty('is_playing')) {
-                // Spotify API error.
-                return timeoutPromise(1000)
-                    .then(function() {
-                        App.checkSong();
-                    });
-            }
-            if (!json.is_playing) {
-                if (App.open) {
-                    App.close();
-                }
-            } else {
-                const albumImages = json.item.album.images.reduce(function(acc, cur) {
-                    acc[cur.height] = cur.url;
-                    return acc;
-                }, {});
-                const data = {
-                    songName: makeSongName(json.item),
-                    artists: json.item.artists,
-                    title: json.item.name,
-                    albumCover: albumImages[Math.max(...Object.keys(albumImages))],
-                };
-                if (App.open) {
-                    App.startUpdate(data);
-                } else {
-                    App.openElement();
-                    return timeoutPromise(1200)
+            return response.json().then(function(json) {
+                if (!json.item && !json.hasOwnProperty('is_playing')) {
+                    // Spotify API error.
+                    return timeoutPromise(1000)
                         .then(function() {
-                            App.startUpdate(data);
-                            return timeoutPromise(1000);
-                        }).then(function() {
                             App.checkSong();
                         });
                 }
-            }
-            return timeoutPromise(1000).then(function() {
-                App.checkSong();
+                if (!json.is_playing) {
+                    if (App.open) {
+                        App.close();
+                    }
+                } else {
+                    const albumImages = json.item.album.images.reduce(function(acc, cur) {
+                        acc[cur.height] = cur.url;
+                        return acc;
+                    }, {});
+                    const data = {
+                        songName: makeSongName(json.item),
+                        artists: json.item.artists,
+                        title: json.item.name,
+                        albumCover: albumImages[Math.max(...Object.keys(albumImages))],
+                    };
+                    if (App.open) {
+                        App.startUpdate(data);
+                    } else {
+                        App.openElement();
+                        return timeoutPromise(1200)
+                            .then(function() {
+                                App.startUpdate(data);
+                                return timeoutPromise(1000);
+                            }).then(function() {
+                                App.checkSong();
+                            });
+                    }
+                }
+                return timeoutPromise(1000).then(function() {
+                    App.checkSong();
+                });
             });
         })
         .catch(function(error) {
