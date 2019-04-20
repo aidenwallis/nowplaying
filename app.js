@@ -92,6 +92,16 @@ App.checkSong = function() {
             if (response.status === 401) {
                 return App.refreshToken();
             }
+            if (response.status === 429) {
+                // Ratelimited.
+                if (response.headers.has('Retry-After')) {
+                    const delay = parseInt(response.headers.get('Retry-After'));
+                    return timeoutPromise(delay * 1000)
+                        .then(function() {
+                            App.checkSong();
+                        });
+                }
+            }
             return response.json();
         })
         .then(function(json) {
