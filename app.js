@@ -95,7 +95,6 @@ App.checkSong = function() {
             return response.json();
         })
         .then(function(json) {
-            console.log(json);
             if (!json.item && !json.hasOwnProperty('is_playing')) {
                 // Spotify API error.
                 return timeoutPromise(1000)
@@ -116,11 +115,12 @@ App.checkSong = function() {
                     songName: makeSongName(json.item),
                     artists: json.item.artists,
                     title: json.item.name,
-                    albumCover: albumImages[Math.max(Object.keys(albumImages))],
+                    albumCover: albumImages[Math.max(...Object.keys(albumImages))],
                 };
                 if (App.open) {
                     App.startUpdate(data);
                 } else {
+                    App.openElement();
                     return timeoutPromise(1200)
                         .then(function() {
                             App.startUpdate(data);
