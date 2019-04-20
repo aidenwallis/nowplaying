@@ -9,7 +9,7 @@ var artistsElement = document.getElementById('artists');
 var songName = document.getElementById('name');
 
 function timeoutPromise(dur) {
-    return new Promise(function() {
+    return new Promise(function(resolve) {
         setTimeout(function() {
             resolve();
         }, dur);
