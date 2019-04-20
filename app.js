@@ -130,10 +130,9 @@ App.checkSong = function() {
                         });
                 }
             }
-            return timeoutPromise(1000);
-        })
-        .then(function() {
-            App.checkSong();
+            return timeoutPromise(1000).then(function() {
+                App.checkSong();
+            });
         })
         .catch(function(error) {
             console.error(error);
