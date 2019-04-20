@@ -52,7 +52,7 @@ App.fetchUser = function() {
 };
 
 App.refreshToken = function() {
-    return fetch('https://spotify.aidenwallis.co.uk/user/refresh' + userId, { method: 'POST' })
+    return fetch('https://spotify.aidenwallis.co.uk/user/refresh/' + userId, { method: 'POST' })
         .then(function(response) {
             if (response.status !== 200) {
                 return timeoutPromise(200)
@@ -93,10 +93,10 @@ App.checkSong = function() {
                 return App.refreshToken();
             }
             if (response.status === 429) {
-                // Ratelimited.
+                // Ratelimited. Wait till we're un-ratelimited
                 if (response.headers.has('Retry-After')) {
                     const delay = parseInt(response.headers.get('Retry-After'));
-                    return timeoutPromise(delay * 1000)
+                    return timeoutPromise((delay * 1000) + 1000) // Second padding.
                         .then(function() {
                             App.checkSong();
                         });
