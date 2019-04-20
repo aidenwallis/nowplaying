@@ -8,19 +8,103 @@ var newAlbumCover = document.getElementById('album-new');
 var artistsElement = document.getElementById('artists');
 var songName = document.getElementById('name');
 
+function timeoutPromise(dur) {
+    return new Promise(function() {
+        setTimeout(function() {
+            resolve();
+        }, dur);
+    });
+}
+
 App.currentSong = '';
 App.currentCover = '';
+App.user = null;
 App.loadedCovers = {};
 App.open = false;
 App.firstAlbumLoad = true;
 App.scrollingSong = false;
 
+App.fetchUser = function() {
+    return fetch('https://spotify.aidenwallis.co.uk/user/details/' + userId)
+        .then(function(response) {
+            if (response.status !== 200) {
+                return timeoutPromise(200)
+                    .then(function() {
+                        return App.fetchUser();
+                    });
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            App.user = data;
+            return data;
+        })
+        .catch(function(error) {
+            return timeoutPromise(200)
+                .then(function() {
+                    return App.fetchUser();
+                });
+        });
+};
+
+App.refreshToken = function() {
+    return fetch('https://spotify.aidenwallis.co.uk/user/refresh' + userId, { method: 'POST' })
+        .then(function(response) {
+            if (response.status !== 200) {
+                return timeoutPromise(200)
+                    .then(function() {
+                        return App.refreshToken();
+                    });
+            }
+            return response.json();
+        })
+        .then(function(json) {
+            if (!json.token) {
+                return timeoutPromise(200)
+                    .then(function() {
+                        return App.refreshToken();
+                    });
+            }
+            App.user.token = json.token;
+            return App.checkSong();
+        })
+        .catch(function(error) {
+            return timeoutPromise(200)
+                .then(function() {
+                    return App.refreshToken();
+                })
+        })
+
+}
+
 App.checkSong = function() {
-    fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true&ts=' + Date.now())
+    if (App.user.clientPoll) {
+        return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+            headers: {
+                Authorization: `Bearer ${App.user.token}`,
+            }
+        })
+        .then(function(response) {
+            if (response.status === 401) {
+                return App.refreshToken();
+            }
+            return response.json();
+        })
+        .catch(function(error) {
+            return timeoutPromise(1000)
+                .then(function() {
+                    App.checkSong();
+                });
+        });
+    }
+    return fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true&ts=' + Date.now())
     .then(function(response) {
         return response.json();
     })
     .then(function(data) {
+        setTimeout(function() {
+            App.checkSong();
+        }, 3000);
         if (data.error) {
             if (App.open) {
                 App.close();
@@ -35,9 +119,14 @@ App.checkSong = function() {
             return;
         }
         App.startUpdate(data);
+
     })
     .catch(function(err) {
         console.error(err);
+        return timeoutPromise(1000)
+            .then(function() {
+                App.checkSong();
+            });
     });
 };
 
@@ -136,9 +225,9 @@ App.transitionCover = function(cover) {
 };
 
 App.start = function() {
-    setInterval(function() {
+    App.fetchUser().then(function() {
         App.checkSong();
-    }, 3000);
+    });
 };
 
 App.start();
