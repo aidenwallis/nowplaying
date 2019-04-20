@@ -102,6 +102,16 @@ App.checkSong = function() {
                         });
                 }
             }
+            if (response.status === 204) {
+                // No song playing.
+                if (App.open) {
+                    App.close();
+                }
+                return timeoutPromise(1000)
+                    .then(function() {
+                        App.checkSong();
+                    });
+            }
             return response.json();
         })
         .then(function(json) {
