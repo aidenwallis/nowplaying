@@ -107,14 +107,6 @@ App.checkSong = function() {
                     App.close();
                 }
             } else {
-                if (App.currentSong !== data.songName) {
-                    App.currentSong = data.songName;
-                    App.updateSongName(data.artists, data.title);
-                }
-                if (App.currentCover !== data.albumCover) {
-                    App.currentCover = data.albumCover;
-                    App.updateCover(data.albumCover);
-                }
                 const albumImages = item.album.images.reduce(function(acc, cur) {
                     acc[cur.height] = cur.url;
                     return acc;
