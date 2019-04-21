@@ -31,6 +31,10 @@ App.scrollingSong = false;
 App.fetchUser = function() {
     return fetch('https://spotify.aidenwallis.co.uk/user/details/' + userId)
         .then(function(response) {
+            if (response.status === 404) {
+                window.location = '/';
+                return;
+            }
             if (response.status !== 200) {
                 return timeoutPromise(200)
                     .then(function() {
