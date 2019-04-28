@@ -212,6 +212,7 @@ App.close = function() {
         artistsElement.innerHTML = '';
         songName.className = '';
         artistsElement.className = '';
+        App.scrollingSong = false;
         container.classList.remove('active');
     }, 800);
     setTimeout(function() {
