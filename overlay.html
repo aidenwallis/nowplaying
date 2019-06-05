@@ -72,7 +72,8 @@
             padding-top: 10px;
             top: 0;
             height: 70px;
-            min-width: 350px;
+            width: 100%;
+            max-width: 350px;
             overflow: hidden;
         }
         #artists {
@@ -93,12 +94,6 @@
             padding-left: 10px;
             transform: translateX(-50px);
             transition: opacity .4s ease, transform .4s ease;
-        }
-        h4 {
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        h2 {
             display: inline-block;
         }
         h4.active, h2.active {
@@ -108,7 +103,10 @@
         h4.drop, h2.drop {
             transform: translateY(100px);
         }
-        h2.scrolling {
+        .artists-height-fix {
+            min-height: 20px;
+        }
+        h2.scrolling, h4.scrolling {
             /* -webkit-animation: slide 30s linear infinite; */
             position: absolute;
             animation: slide 30s linear infinite;
@@ -116,7 +114,7 @@
         @keyframes slide {
             from {
                 /* left: 100%; */
-                transform: translateX(270px);
+                transform: translateX(100%);
             }
             to {
                 /* left: -100%; */
@@ -133,12 +131,11 @@
                 <img id="album-new" alt="New album cover">
             </div>
             <div class="main">
-                <h4 id="artists"></h4>
+                <div class="artists-height-fix"><h4 id="artists"></h4></div>
                 <h2 id="name"></h2>
             </div>
         </div>
     </div>
-    <script src="https://use.typekit.net/ddr3uqp.js" async="async"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.4/fetch.min.js" defer="defer"></script>
     <script src="app.js?v=2" defer="defer"></script>
     <!-- Global site tag (gtag.js) - Google Analytics -->

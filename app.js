@@ -1,6 +1,6 @@
 var App = {};
-var userId = window.location.pathname.split('?')[0].substring(1);
-// var userId = '5b2e3e66f37dc906fc29d608';
+// var userId = window.location.pathname.split('?')[0].substring(1);
+var userId = '5b2e3e66f37dc906fc29d608';
 
 var container = document.getElementById('container');
 var currentAlbumCover = document.getElementById('album-current');
@@ -24,9 +24,12 @@ App.currentSong = '';
 App.currentCover = '';
 App.user = null;
 App.loadedCovers = {};
+App.waitingSocket = false;
+App.socketReady = false;
 App.open = false;
 App.firstAlbumLoad = true;
 App.scrollingSong = false;
+App.scrollingArtists = false;
 
 App.fetchUser = function() {
     return fetch('https://spotify.aidenwallis.co.uk/user/details/' + userId)
@@ -111,7 +114,7 @@ App.checkSong = function() {
                 if (App.open) {
                     App.close();
                 }
-                return timeoutPromise(1000)
+                return timeoutPromise(2000)
                     .then(function() {
                         App.checkSong();
                     });
@@ -119,7 +122,7 @@ App.checkSong = function() {
             return response.json().then(function(json) {
                 if (!json.item && !json.hasOwnProperty('is_playing')) {
                     // Spotify API error.
-                    return timeoutPromise(1000)
+                    return timeoutPromise(2000)
                         .then(function() {
                             App.checkSong();
                         });
@@ -146,20 +149,20 @@ App.checkSong = function() {
                         return timeoutPromise(1200)
                             .then(function() {
                                 App.startUpdate(data);
-                                return timeoutPromise(1000);
+                                return timeoutPromise(2000);
                             }).then(function() {
                                 App.checkSong();
                             });
                     }
                 }
-                return timeoutPromise(1000).then(function() {
+                return timeoutPromise(2000).then(function() {
                     App.checkSong();
                 });
             });
         })
         .catch(function(error) {
             console.error(error);
-            return timeoutPromise(1000)
+            return timeoutPromise(2000)
                 .then(function() {
                     App.checkSong();
                 });
@@ -187,7 +190,6 @@ App.checkSong = function() {
             return;
         }
         App.startUpdate(data);
-
     })
     .catch(function(err) {
         console.error(err);
@@ -246,6 +248,7 @@ App.openElement = function() {
 }
 
 App.updateSongName = function(artists = [], name) {
+    const maxWidth = container.offsetWidth - 80; // padding for other shit
     artistsElement.classList.remove('active');
     setTimeout(function() {
         songName.classList.remove('active');
@@ -255,11 +258,27 @@ App.updateSongName = function(artists = [], name) {
             return artist.name;
         }).join(', ');
         artistsElement.classList.add('active');
+
+        void artistsElement.offsetWidth;
+
+        if (artistsElement.offsetWidth > maxWidth) {
+            if (!App.scrollingArtists) {
+                App.scrollingArtists = true;
+                artistsElement.classList.add('scrolling');
+            }
+        } else {
+            if (App.scrollingArtists) {
+                App.scrollingArtists = false;
+                artistsElement.classList.remove('scrolling');
+            }
+        }
     }, 550);
     setTimeout(function() {
         songName.textContent = name;
+        
         void songName.offsetWidth;
-        if (songName.offsetWidth > 270) {
+
+        if (songName.offsetWidth > maxWidth) {
             if (!App.scrollingSong) {
                 App.scrollingSong = true;
                 songName.classList.add('scrolling');
@@ -270,6 +289,7 @@ App.updateSongName = function(artists = [], name) {
                 songName.classList.remove('scrolling');
             }
         }
+
         songName.classList.add('active');
     }, 750);
 };
@@ -291,6 +311,50 @@ App.updateCover = function(cover) {
 
 App.transitionCover = function(cover) {
     
+};
+
+function playerError(error) {
+    console.error("Failed to initialize player", error);
+    window.location = '/';
+}
+
+function reloadPlayer(err) {
+    console.error(err);
+}
+
+App.openSocket = function() {
+    const player = new Spotify.Player({
+        name: 'Spotify now playing player',
+        getOAuthToken: function(done) {
+            done && done(App.user.token);
+        },
+    });
+
+    player.addListener('player_state_changed', function(state) {
+        console.log(state);
+    });
+
+    player.addListener('initialization_error', playerError);
+    player.addListener('authentication_error', reloadPlayer);
+    player.addListener('account_error', reloadPlayer);
+    player.addListener('playback_error', reloadPlayer);
+
+    player.addListener('ready', function(state) {
+        console.log('Ready with Device ID ', state.device_id);
+    });
+
+    player.addListener('not_ready', function(state) {
+        console.log('Device ID has gone offline', state.device_id);
+    });
+
+    player.connect();
+};
+
+window.onSpotifyWebPlaybackSDKReady = function() {
+    if (App.waitingSocket && App.user.socketable) {
+        App.openSocket();
+    }
+    App.socketReady = true;
 };
 
 App.start = function() {
