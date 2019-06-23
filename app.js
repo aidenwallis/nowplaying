@@ -39,7 +39,7 @@ App.fetchUser = function() {
                 return;
             }
             if (response.status !== 200) {
-                return timeoutPromise(200)
+                return timeoutPromise(2000)
                     .then(function() {
                         return App.fetchUser();
                     });
@@ -51,7 +51,7 @@ App.fetchUser = function() {
             return data;
         })
         .catch(function(error) {
-            return timeoutPromise(200)
+            return timeoutPromise(2000)
                 .then(function() {
                     return App.fetchUser();
                 });
@@ -62,7 +62,7 @@ App.refreshToken = function() {
     return fetch('https://spotify.aidenwallis.co.uk/user/refresh/' + userId, { method: 'POST' })
         .then(function(response) {
             if (response.status !== 200) {
-                return timeoutPromise(200)
+                return timeoutPromise(2000)
                     .then(function() {
                         return App.refreshToken();
                     });
@@ -71,7 +71,7 @@ App.refreshToken = function() {
         })
         .then(function(json) {
             if (!json.token) {
-                return timeoutPromise(200)
+                return timeoutPromise(2000)
                     .then(function() {
                         return App.refreshToken();
                     });
@@ -80,7 +80,7 @@ App.refreshToken = function() {
             return App.checkSong();
         })
         .catch(function(error) {
-            return timeoutPromise(200)
+            return timeoutPromise(2000)
                 .then(function() {
                     return App.refreshToken();
                 })
@@ -114,7 +114,7 @@ App.checkSong = function() {
                 if (App.open) {
                     App.close();
                 }
-                return timeoutPromise(2000)
+                return timeoutPromise(5000)
                     .then(function() {
                         App.checkSong();
                     });
@@ -122,7 +122,7 @@ App.checkSong = function() {
             return response.json().then(function(json) {
                 if (!json.item && !json.hasOwnProperty('is_playing')) {
                     // Spotify API error.
-                    return timeoutPromise(2000)
+                    return timeoutPromise(5000)
                         .then(function() {
                             App.checkSong();
                         });
@@ -149,20 +149,20 @@ App.checkSong = function() {
                         return timeoutPromise(1200)
                             .then(function() {
                                 App.startUpdate(data);
-                                return timeoutPromise(2000);
+                                return timeoutPromise(5000);
                             }).then(function() {
                                 App.checkSong();
                             });
                     }
                 }
-                return timeoutPromise(2000).then(function() {
+                return timeoutPromise(5000).then(function() {
                     App.checkSong();
                 });
             });
         })
         .catch(function(error) {
             console.error(error);
-            return timeoutPromise(2000)
+            return timeoutPromise(5000)
                 .then(function() {
                     App.checkSong();
                 });
@@ -175,7 +175,7 @@ App.checkSong = function() {
     .then(function(data) {
         setTimeout(function() {
             App.checkSong();
-        }, 3000);
+        }, 5000);
         if (data.error) {
             if (App.open) {
                 App.close();
@@ -193,7 +193,7 @@ App.checkSong = function() {
     })
     .catch(function(err) {
         console.error(err);
-        return timeoutPromise(1000)
+        return timeoutPromise(5000)
             .then(function() {
                 App.checkSong();
             });
@@ -350,12 +350,12 @@ App.openSocket = function() {
     player.connect();
 };
 
-window.onSpotifyWebPlaybackSDKReady = function() {
-    if (App.waitingSocket && App.user.socketable) {
-        App.openSocket();
-    }
-    App.socketReady = true;
-};
+// window.onSpotifyWebPlaybackSDKReady = function() {
+//     if (App.waitingSocket && App.user.socketable) {
+//         App.openSocket();
+//     }
+//     App.socketReady = true;
+// };
 
 App.start = function() {
     App.fetchUser().then(function() {
