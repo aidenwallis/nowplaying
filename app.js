@@ -89,85 +89,85 @@ App.refreshToken = function() {
 }
 
 App.checkSong = function() {
-    if (App.user.clientPoll) {
-        return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-            headers: {
-                Authorization: `Bearer ${App.user.token}`,
-            }
-        })
-        .then(function(response) {
-            if (response.status === 401) {
-                return App.refreshToken();
-            }
-            if (response.status === 429) {
-                // Ratelimited. Wait till we're un-ratelimited
-                if (response.headers.has('Retry-After')) {
-                    const delay = parseInt(response.headers.get('Retry-After'));
-                    return timeoutPromise((delay * 1000) + 1000) // Second padding.
-                        .then(function() {
-                            App.checkSong();
-                        });
-                }
-            }
-            if (response.status === 204) {
-                // No song playing.
-                if (App.open) {
-                    App.close();
-                }
-                return timeoutPromise(5000)
-                    .then(function() {
-                        App.checkSong();
-                    });
-            }
-            return response.json().then(function(json) {
-                if (!json.item && !json.hasOwnProperty('is_playing')) {
-                    // Spotify API error.
-                    return timeoutPromise(5000)
-                        .then(function() {
-                            App.checkSong();
-                        });
-                }
-                if (!json.is_playing) {
-                    if (App.open) {
-                        App.close();
-                    }
-                } else {
-                    const albumImages = json.item.album.images.reduce(function(acc, cur) {
-                        acc[cur.height] = cur.url;
-                        return acc;
-                    }, {});
-                    const data = {
-                        songName: makeSongName(json.item),
-                        artists: json.item.artists,
-                        title: json.item.name,
-                        albumCover: albumImages[Math.max(...Object.keys(albumImages))],
-                    };
-                    if (App.open) {
-                        App.startUpdate(data);
-                    } else {
-                        App.openElement();
-                        return timeoutPromise(1200)
-                            .then(function() {
-                                App.startUpdate(data);
-                                return timeoutPromise(5000);
-                            }).then(function() {
-                                App.checkSong();
-                            });
-                    }
-                }
-                return timeoutPromise(5000).then(function() {
-                    App.checkSong();
-                });
-            });
-        })
-        .catch(function(error) {
-            console.error(error);
-            return timeoutPromise(5000)
-                .then(function() {
-                    App.checkSong();
-                });
-        });
-    }
+    // if (App.user.clientPoll) {
+    //     return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+    //         headers: {
+    //             Authorization: `Bearer ${App.user.token}`,
+    //         }
+    //     })
+    //     .then(function(response) {
+    //         if (response.status === 401) {
+    //             return App.refreshToken();
+    //         }
+    //         if (response.status === 429) {
+    //             // Ratelimited. Wait till we're un-ratelimited
+    //             if (response.headers.has('Retry-After')) {
+    //                 const delay = parseInt(response.headers.get('Retry-After'));
+    //                 return timeoutPromise((delay * 1000) + 1000) // Second padding.
+    //                     .then(function() {
+    //                         App.checkSong();
+    //                     });
+    //             }
+    //         }
+    //         if (response.status === 204) {
+    //             // No song playing.
+    //             if (App.open) {
+    //                 App.close();
+    //             }
+    //             return timeoutPromise(5000)
+    //                 .then(function() {
+    //                     App.checkSong();
+    //                 });
+    //         }
+    //         return response.json().then(function(json) {
+    //             if (!json.item && !json.hasOwnProperty('is_playing')) {
+    //                 // Spotify API error.
+    //                 return timeoutPromise(5000)
+    //                     .then(function() {
+    //                         App.checkSong();
+    //                     });
+    //             }
+    //             if (!json.is_playing) {
+    //                 if (App.open) {
+    //                     App.close();
+    //                 }
+    //             } else {
+    //                 const albumImages = json.item.album.images.reduce(function(acc, cur) {
+    //                     acc[cur.height] = cur.url;
+    //                     return acc;
+    //                 }, {});
+    //                 const data = {
+    //                     songName: makeSongName(json.item),
+    //                     artists: json.item.artists,
+    //                     title: json.item.name,
+    //                     albumCover: albumImages[Math.max(...Object.keys(albumImages))],
+    //                 };
+    //                 if (App.open) {
+    //                     App.startUpdate(data);
+    //                 } else {
+    //                     App.openElement();
+    //                     return timeoutPromise(1200)
+    //                         .then(function() {
+    //                             App.startUpdate(data);
+    //                             return timeoutPromise(5000);
+    //                         }).then(function() {
+    //                             App.checkSong();
+    //                         });
+    //                 }
+    //             }
+    //             return timeoutPromise(5000).then(function() {
+    //                 App.checkSong();
+    //             });
+    //         });
+    //     })
+    //     .catch(function(error) {
+    //         console.error(error);
+    //         return timeoutPromise(5000)
+    //             .then(function() {
+    //                 App.checkSong();
+    //             });
+    //     });
+    // }
     return fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true&ts=' + Date.now())
     .then(function(response) {
         return response.json();
@@ -175,7 +175,7 @@ App.checkSong = function() {
     .then(function(data) {
         setTimeout(function() {
             App.checkSong();
-        }, 5000);
+        }, 10 * 1000);
         if (data.error) {
             if (App.open) {
                 App.close();
@@ -193,7 +193,7 @@ App.checkSong = function() {
     })
     .catch(function(err) {
         console.error(err);
-        return timeoutPromise(5000)
+        return timeoutPromise(10 * 1000)
             .then(function() {
                 App.checkSong();
             });
