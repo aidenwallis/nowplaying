@@ -89,85 +89,85 @@ App.refreshToken = function() {
 }
 
 App.checkSong = function() {
-    // if (App.user.clientPoll) {
-    //     return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-    //         headers: {
-    //             Authorization: `Bearer ${App.user.token}`,
-    //         }
-    //     })
-    //     .then(function(response) {
-    //         if (response.status === 401) {
-    //             return App.refreshToken();
-    //         }
-    //         if (response.status === 429) {
-    //             // Ratelimited. Wait till we're un-ratelimited
-    //             if (response.headers.has('Retry-After')) {
-    //                 const delay = parseInt(response.headers.get('Retry-After'));
-    //                 return timeoutPromise((delay * 1000) + 1000) // Second padding.
-    //                     .then(function() {
-    //                         App.checkSong();
-    //                     });
-    //             }
-    //         }
-    //         if (response.status === 204) {
-    //             // No song playing.
-    //             if (App.open) {
-    //                 App.close();
-    //             }
-    //             return timeoutPromise(5000)
-    //                 .then(function() {
-    //                     App.checkSong();
-    //                 });
-    //         }
-    //         return response.json().then(function(json) {
-    //             if (!json.item && !json.hasOwnProperty('is_playing')) {
-    //                 // Spotify API error.
-    //                 return timeoutPromise(5000)
-    //                     .then(function() {
-    //                         App.checkSong();
-    //                     });
-    //             }
-    //             if (!json.is_playing) {
-    //                 if (App.open) {
-    //                     App.close();
-    //                 }
-    //             } else {
-    //                 const albumImages = json.item.album.images.reduce(function(acc, cur) {
-    //                     acc[cur.height] = cur.url;
-    //                     return acc;
-    //                 }, {});
-    //                 const data = {
-    //                     songName: makeSongName(json.item),
-    //                     artists: json.item.artists,
-    //                     title: json.item.name,
-    //                     albumCover: albumImages[Math.max(...Object.keys(albumImages))],
-    //                 };
-    //                 if (App.open) {
-    //                     App.startUpdate(data);
-    //                 } else {
-    //                     App.openElement();
-    //                     return timeoutPromise(1200)
-    //                         .then(function() {
-    //                             App.startUpdate(data);
-    //                             return timeoutPromise(5000);
-    //                         }).then(function() {
-    //                             App.checkSong();
-    //                         });
-    //                 }
-    //             }
-    //             return timeoutPromise(5000).then(function() {
-    //                 App.checkSong();
-    //             });
-    //         });
-    //     })
-    //     .catch(function(error) {
-    //         console.error(error);
-    //         return timeoutPromise(5000)
-    //             .then(function() {
-    //                 App.checkSong();
-    //             });
-    //     });
-    // }
+    if (App.user.clientPoll) {
+        return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+            headers: {
+                Authorization: `Bearer ${App.user.token}`,
+            }
+        })
+        .then(function(response) {
+            if (response.status === 401) {
+                return App.refreshToken();
+            }
+            if (response.status === 429) {
+                // Ratelimited. Wait till we're un-ratelimited
+                if (response.headers.has('Retry-After')) {
+                    const delay = parseInt(response.headers.get('Retry-After'));
+                    return timeoutPromise((delay) + (Math.floor(Math.random() * 6) + 1) * 1000) // Random padding.
+                        .then(function() {
+                            App.checkSong();
+                        });
+                }
+            }
+            if (response.status === 204) {
+                // No song playing.
+                if (App.open) {
+                    App.close();
+                }
+                return timeoutPromise(10000)
+                    .then(function() {
+                        App.checkSong();
+                    });
+            }
+            return response.json().then(function(json) {
+                if (!json.item && !json.hasOwnProperty('is_playing')) {
+                    // Spotify API error.
+                    return timeoutPromise(10000)
+                        .then(function() {
+                            App.checkSong();
+                        });
+                }
+                if (!json.is_playing) {
+                    if (App.open) {
+                        App.close();
+                    }
+                } else {
+                    const albumImages = json.item.album.images.reduce(function(acc, cur) {
+                        acc[cur.height] = cur.url;
+                        return acc;
+                    }, {});
+                    const data = {
+                        songName: makeSongName(json.item),
+                        artists: json.item.artists,
+                        title: json.item.name,
+                        albumCover: albumImages[Math.max(...Object.keys(albumImages))],
+                    };
+                    if (App.open) {
+                        App.startUpdate(data);
+                    } else {
+                        App.openElement();
+                        return timeoutPromise(1200)
+                            .then(function() {
+                                App.startUpdate(data);
+                                return timeoutPromise(10000);
+                            }).then(function() {
+                                App.checkSong();
+                            });
+                    }
+                }
+                return timeoutPromise(10000).then(function() {
+                    App.checkSong();
+                });
+            });
+        })
+        .catch(function(error) {
+            console.error(error);
+            return timeoutPromise(15000)
+                .then(function() {
+                    App.checkSong();
+                });
+        });
+    }
     return fetch('https://spotify.aidenwallis.co.uk/u/' + userId + '?json=true&ts=' + Date.now())
     .then(function(response) {
         return response.json();
@@ -322,33 +322,7 @@ function reloadPlayer(err) {
     console.error(err);
 }
 
-App.openSocket = function() {
-    const player = new Spotify.Player({
-        name: 'Spotify now playing player',
-        getOAuthToken: function(done) {
-            done && done(App.user.token);
-        },
-    });
-
-    player.addListener('player_state_changed', function(state) {
-        console.log(state);
-    });
-
-    player.addListener('initialization_error', playerError);
-    player.addListener('authentication_error', reloadPlayer);
-    player.addListener('account_error', reloadPlayer);
-    player.addListener('playback_error', reloadPlayer);
-
-    player.addListener('ready', function(state) {
-        console.log('Ready with Device ID ', state.device_id);
-    });
-
-    player.addListener('not_ready', function(state) {
-        console.log('Device ID has gone offline', state.device_id);
-    });
-
-    player.connect();
-};
+//  
 
 // window.onSpotifyWebPlaybackSDKReady = function() {
 //     if (App.waitingSocket && App.user.socketable) {
