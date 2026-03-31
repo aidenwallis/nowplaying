@@ -32,7 +32,7 @@ App.scrollingSong = false;
 App.scrollingArtists = false;
 
 App.fetchUser = function() {
-    return fetch('https://spotify.aidenwallis.co.uk/user/details/' + userId)
+    return fetch('https://spotify.aiden.tv/user/details/' + userId)
         .then(function(response) {
             if (response.status === 404) {
                 window.location = '/';
@@ -59,7 +59,7 @@ App.fetchUser = function() {
 };
 
 App.refreshToken = function() {
-    return fetch('https://spotify.aidenwallis.co.uk/user/refresh/' + userId, { method: 'POST' })
+    return fetch('https://spotify.aiden.tv/user/refresh/' + userId, { method: 'POST' })
         .then(function(response) {
             if (response.status !== 200) {
                 return timeoutPromise(2000)
