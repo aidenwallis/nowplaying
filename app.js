@@ -102,10 +102,11 @@ App.checkSong = function() {
             if (response.status === 429) {
                 // Ratelimited. Wait till we're un-ratelimited
                 if (response.headers.has('Retry-After')) {
-                    const delay = parseInt(response.headers.get('Retry-After'));
-                    return timeoutPromise((delay) + (Math.floor(Math.random() * 6) + 1) * 1000) // Random padding.
+                    const retryAfterSeconds = parseInt(response.headers.get('Retry-After'), 10);
+                    const paddingMs = (Math.floor(Math.random() * 6) + 1) * 1000;
+                    return timeoutPromise((retryAfterSeconds * 1000) + paddingMs) // Random padding.
                         .then(function() {
-                            App.checkSong();
+                            return App.checkSong();
                         });
                 }
             }
