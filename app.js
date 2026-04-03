@@ -305,6 +305,7 @@ App.updateCover = function(cover) {
         setTimeout(function() {
             currentAlbumCover.src = cover;
             newAlbumCover.classList.remove('active');
+            newAlbumCover.style["visibility"] = "hidden";
             newAlbumCover.src = '';
         }, 450);
     };
